@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="en" data-lang="en" data-title-en="Yi Zhang (张益) · LLM post-training &amp; multimodal" data-title-zh="张益 · 大模型后训练与多模态">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Yi Zhang (张益) · LLM post-training &amp; multimodal</title>
+<script>(function(){var l;try{l=localStorage.getItem('lang')}catch(e){}if(l!=='zh'&&l!=='en'){var n=(navigator.languages&&navigator.languages[0])||navigator.language||'';l=/^zh/i.test(n)?'zh':'en'}var r=document.documentElement;r.setAttribute('data-lang',l);r.setAttribute('lang',l==='zh'?'zh-CN':'en')})();</script>
+<meta name="description" content="Yi Zhang (张益), M.S. student at Nanjing University working on multimodal LLMs, LLM post-training (SFT, RL, on-policy distillation) and agentic RL. Looking for an LLM algorithm internship.">
+<meta name="author" content="Yi Zhang">
+<link rel="canonical" href="https://hey-chillax.github.io/">
+<meta property="og:type" content="profile">
+<meta property="og:title" content="Yi Zhang (张益)">
+<meta property="og:description" content="M.S. student at Nanjing University · LLM post-training, multimodal LLMs and agentic RL · looking for an LLM algorithm internship.">
+<meta property="og:url" content="https://hey-chillax.github.io/">
+<meta property="og:image" content="https://hey-chillax.github.io/assets/img/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#2d5a96">
+<link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png">
+<link rel="preload" href="assets/fonts/YZSerif-Semibold.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="assets/css/site.css">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"Person","name":"Yi Zhang","alternateName":"张益","url":"https://hey-chillax.github.io/","image":"https://hey-chillax.github.io/assets/img/photo.jpg","affiliation":{"@type":"CollegeOrUniversity","name":"Nanjing University"},"alumniOf":{"@type":"CollegeOrUniversity","name":"Nanjing University of Posts and Telecommunications"},"knowsAbout":["Large language models","Multimodal LLMs","Post-training","On-policy distillation","Reinforcement learning","Agentic RL"],"sameAs":["https://github.com/Hey-Chillax","https://scholar.google.com/citations?user=SpbemaUAAAAJ"]}
+</script>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-mail" viewBox="0 0 24 24"><path d="M4 4h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2zm0 2v.4l8 5.2 8-5.2V6H4zm16 2.75-7.46 4.85a1 1 0 0 1-1.08 0L4 8.75V18h16V8.75z"/></symbol>
+  <symbol id="i-scholar" viewBox="0 0 24 24"><path d="M5.242 13.769 0 9.5 12 0l12 9.5-5.242 4.269C17.548 11.249 14.978 9.5 12 9.5c-2.977 0-5.548 1.748-6.758 4.269zM12 10a7 7 0 1 0 0 14 7 7 0 0 0 0-14z"/></symbol>
+  <symbol id="i-github" viewBox="0 0 24 24"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></symbol>
+  <symbol id="i-file" viewBox="0 0 24 24"><path d="M6 2h8l6 6v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2zm7 1.5V9h5.5L13 3.5zM8 13h8v1.6H8V13zm0 3.4h8V18H8v-1.6z"/></symbol>
+</svg>
+
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="#top"><span lang="en">Yi Zhang<span class="alt-name">张益</span></span><span lang="zh-CN">张益<span class="alt-name">Yi Zhang</span></span></a>
+    <nav class="nav" aria-label="Sections">
+      <a href="#projects"><span lang="en">Projects</span><span lang="zh-CN">项目</span></a>
+      <a href="#publications"><span lang="en">Publications</span><span lang="zh-CN">论文</span></a>
+      <a href="#education"><span lang="en">Education</span><span lang="zh-CN">教育</span></a>
+      <a href="#skills"><span lang="en">Skills</span><span lang="zh-CN">技能</span></a>
+    </nav>
+    <button class="lang-toggle" type="button"><span lang="en">中文</span><span lang="zh-CN">EN</span></button>
+  </div>
+</header>
+
+<main class="wrap" id="top">
+
+  <section class="hero" aria-label="About">
+    <div>
+      <h1><span lang="en">Yi Zhang<span class="alt-name">张益</span></span><span lang="zh-CN">张益<span class="alt-name">Yi Zhang</span></span></h1>
+      <p class="role">
+        <span lang="en">M.S. student in Communication Engineering, Nanjing University · Class of 2028</span>
+        <span lang="zh-CN">南京大学通信工程硕士 · 2028 届</span>
+      </p>
+      <div class="bio">
+        <p lang="en">I work on large language models: <strong>multimodal LLMs</strong>, with a research focus on efficient long-video understanding, and <strong>post-training</strong> — SFT, reinforcement learning and on-policy distillation (OPD). My recent projects build two complete pipelines: SFT → OPD → RL for long chain-of-thought math reasoning in a small model, and SFT → agentic RL for long-horizon, multi-turn tool-calling agents.</p>
+        <p lang="zh-CN">我做大模型方向：<strong>多模态大模型</strong>，研究重点是高效长视频理解；以及<strong>后训练</strong>，包括 SFT、强化学习和在线蒸馏（OPD）。最近的两个项目各走通了一条完整流程：让小模型学会长链数学推理的 SFT → OPD → RL，以及长程多轮工具调用 Agent 的 SFT → Agentic RL。</p>
+        <p lang="en">Before NJU I studied Communication Engineering at Nanjing University of Posts and Telecommunications, ranked <strong>1/541</strong>, and published four first-author SCI papers on strong-field laser physics.</p>
+        <p lang="zh-CN">本科就读于南京邮电大学通信工程专业，排名 <strong>1/541</strong>，以第一作者发表了 4 篇 SCI 论文（强激光物理方向）。</p>
+      </div>
+
+      <div class="status">
+        <div class="head"><span lang="en">Looking for an LLM algorithm internship</span><span lang="zh-CN">正在寻找大模型算法实习</span></div>
+        <div class="badges">
+          <span class="badge"><span lang="en">Available now</span><span lang="zh-CN">立即到岗</span></span>
+          <span class="badge"><span lang="en">5+ days a week</span><span lang="zh-CN">每周至少 5 天</span></span>
+          <span class="badge"><span lang="en">Up to 9 months</span><span lang="zh-CN">可连续实习 9 个月</span></span>
+        </div>
+      </div>
+
+      <p class="interests">
+        <span class="label"><span lang="en">Interests:</span><span lang="zh-CN">方向：</span></span>
+        <span lang="en">multimodal LLMs · post-training (SFT → RL → OPD) · agentic RL · efficient inference</span>
+        <span lang="zh-CN">多模态 · 后训练（SFT → RL → OPD）· Agentic RL · 高效推理</span>
+      </p>
+
+      <ul class="links">
+        <li><a href="#" class="email" data-mail-u="yizhang" data-mail-d="smail.nju.edu.cn" title="Email"><svg aria-hidden="true"><use href="#i-mail"/></svg><span class="addr">yizhang [at] smail.nju.edu.cn</span></a></li>
+        <li><a href="https://scholar.google.com/citations?user=SpbemaUAAAAJ"><svg aria-hidden="true"><use href="#i-scholar"/></svg>Google Scholar</a></li>
+        <li><a href="https://github.com/Hey-Chillax"><svg aria-hidden="true"><use href="#i-github"/></svg>GitHub</a></li>
+        <li><a href="files/Yi_Zhang_CV_zh.pdf"><svg aria-hidden="true"><use href="#i-file"/></svg><span lang="en">CV (PDF, Chinese)</span><span lang="zh-CN">简历（PDF）</span></a></li>
+      </ul>
+    </div>
+    <figure class="photo">
+      <img src="assets/img/photo.jpg" width="360" height="480" alt="Photo of Yi Zhang">
+    </figure>
+  </section>
+
+  <section id="news" aria-labelledby="news-title">
+    <h2 class="section-title" id="news-title"><span lang="en">News</span><span lang="zh-CN">动态</span></h2>
+    <dl class="news">
+      <dt>2026.11</dt>
+      <dd><span lang="en">Open-sourced <a href="https://github.com/Hey-Chillax/scaffold-opd">Scaffold-OPD</a> and <a href="https://github.com/Hey-Chillax/stepcredit-rl">StepCredit-RL</a>, with project reports on this site.</span><span lang="zh-CN">公开 <a href="https://github.com/Hey-Chillax/scaffold-opd">Scaffold-OPD</a> 和 <a href="https://github.com/Hey-Chillax/stepcredit-rl">StepCredit-RL</a> 的代码，项目报告见本站。</span></dd>
+      <dt>2025.09</dt>
+      <dd><span lang="en">Started my M.S. at Nanjing University.</span><span lang="zh-CN">进入南京大学攻读硕士。</span></dd>
+      <dt>2025.06</dt>
+      <dd><span lang="en">B.Eng. from Nanjing University of Posts and Telecommunications, ranked 1/541.</span><span lang="zh-CN">本科毕业于南京邮电大学，排名 1/541。</span></dd>
+    </dl>
+  </section>
+
+  <section id="projects" aria-labelledby="projects-title">
+    <h2 class="section-title" id="projects-title"><span lang="en">Projects</span><span lang="zh-CN">项目</span></h2>
+    <div class="cards">
+
+      <article class="card">
+        <div class="card-fig"><!-- fig:card-opd --><svg class="viz" viewBox="0 0 380 112" width="380" height="112" role="img" aria-label="Scaffold-OPD pipeline: teacher data, SFT, Takeover OPD, GRPO" xmlns="http://www.w3.org/2000/svg"><rect x="1.5" y="8.0" width="80" height="32" rx="8" class="box"/><text x="41.5" y="28.5" font-size="12.5" text-anchor="middle" class="t-strong"><tspan lang="en">Teacher data</tspan><tspan lang="zh-CN">老师数据</tspan></text><rect x="100.5" y="8.0" width="80" height="32" rx="8" class="box"/><text x="140.5" y="28.5" font-size="12.5" text-anchor="middle" class="t-strong">SFT</text><line x1="84.5" y1="24.0" x2="91.5" y2="24.0" class="arrow"/><path class="arrow-head" d="M97.5,24.0 L91.2,27.0 L91.2,21.0 Z"/><rect x="199.5" y="8.0" width="80" height="32" rx="8" class="box-key"/><text x="239.5" y="28.5" font-size="12.5" text-anchor="middle" class="t-strong">Takeover OPD</text><line x1="183.5" y1="24.0" x2="190.5" y2="24.0" class="arrow"/><path class="arrow-head" d="M196.5,24.0 L190.2,27.0 L190.2,21.0 Z"/><rect x="298.5" y="8.0" width="80" height="32" rx="8" class="box"/><text x="338.5" y="28.5" font-size="12.5" text-anchor="middle" class="t-strong">GRPO</text><line x1="282.5" y1="24.0" x2="289.5" y2="24.0" class="arrow"/><path class="arrow-head" d="M295.5,24.0 L289.2,27.0 L289.2,21.0 Z"/><path class="arrow" d="M199.5,40.0 L7.5,60.0 M279.5,40.0 L372.5,60.0"/><rect x="7.5" y="66.0" width="107.5" height="18" rx="3" class="tok-s"/><rect x="117.0" y="66.0" width="71.0" height="18" rx="3" class="tok-t"/><text x="152.5" y="79.0" font-size="11.5" text-anchor="middle" style="fill:#fff;font-weight:600">Wait, …</text><rect x="190.0" y="66.0" width="100.2" height="18" rx="3" class="tok-s"/><rect x="292.2" y="66.0" width="78.3" height="18" rx="3" class="tok-t"/><text x="331.3" y="79.0" font-size="11.5" text-anchor="middle" style="fill:#fff;font-weight:600">But …</text><rect x="7.5" y="96.0" width="10" height="10" rx="2" class="tok-s"/><text x="22.5" y="105.0" font-size="11.5"><tspan lang="en">student writes</tspan><tspan lang="zh-CN">学生写</tspan></text><rect x="127.5" y="96.0" width="10" height="10" rx="2" class="tok-t"/><text x="142.5" y="105.0" font-size="11.5"><tspan lang="en">teacher takes over</tspan><tspan lang="zh-CN">老师接管</tspan></text></svg><!-- /fig:card-opd --></div>
+        <h3><a href="projects/scaffold-opd.html">Scaffold-OPD</a></h3>
+        <p class="sub"><span lang="en">SFT → OPD → RL post-training pipeline</span><span lang="zh-CN">SFT → OPD → RL 后训练全流程</span></p>
+        <p class="desc"><span lang="en">Teaches a 1.7B student long chain-of-thought math from a 4B teacher. In Takeover OPD, the teacher briefly takes over the student's own rollout where the student misses a reflection or the conclusion, and the whole trajectory is distilled token by token.</span><span lang="zh-CN">让 1.7B 学生向 4B 老师学长链数学推理。核心阶段采用 Takeover OPD：学生自己 rollout，老师只在学生想不到的反思或收尾处短暂接管，再对整条轨迹做 token 级蒸馏。</span></p>
+        <div class="stats">
+          <div class="stat"><div class="v">25.4<span class="arrow">→</span>46.9</div><div class="k"><span lang="en">math average (MATH-500, AIME 24–26) after 40 steps</span><span lang="zh-CN">4 项数学基准平均，训练 40 步</span></div></div>
+          <div class="stat"><div class="v">+6.2</div><div class="k"><span lang="en">over standard OPD at the same steps</span><span lang="zh-CN">比同步数的标准 OPD 高</span></div></div>
+        </div>
+        <div class="tags"><span class="tag">Qwen3-4B → Qwen3-1.7B</span><span class="tag">DAPO-Math</span><span class="tag">veRL + vLLM</span><span class="tag"><span lang="en">2026.09 – 2026.11</span><span lang="zh-CN">2026.09 – 2026.11</span></span></div>
+        <div class="card-links"><a href="projects/scaffold-opd.html"><span lang="en">Project report →</span><span lang="zh-CN">项目报告 →</span></a><a href="https://github.com/Hey-Chillax/scaffold-opd"><span lang="en">Code ↗</span><span lang="zh-CN">代码 ↗</span></a></div>
+      </article>
+
+      <article class="card">
+        <div class="card-fig"><!-- fig:card-scr --><svg class="viz" viewBox="0 0 380 112" width="380" height="112" role="img" aria-label="StepCredit-RL pipeline: expert demonstrations, SFT, multi-turn RL, paired evaluation" xmlns="http://www.w3.org/2000/svg"><rect x="1.5" y="8.0" width="80" height="32" rx="8" class="box"/><text x="41.5" y="28.5" font-size="12.5" text-anchor="middle" class="t-strong"><tspan lang="en">Expert demos</tspan><tspan lang="zh-CN">专家示范</tspan></text><rect x="100.5" y="8.0" width="80" height="32" rx="8" class="box"/><text x="140.5" y="28.5" font-size="12.5" text-anchor="middle" class="t-strong">SFT</text><line x1="84.5" y1="24.0" x2="91.5" y2="24.0" class="arrow"/><path class="arrow-head" d="M97.5,24.0 L91.2,27.0 L91.2,21.0 Z"/><rect x="199.5" y="8.0" width="80" height="32" rx="8" class="box-key"/><text x="239.5" y="28.5" font-size="12.5" text-anchor="middle" class="t-strong"><tspan lang="en">Multi-turn RL</tspan><tspan lang="zh-CN">多轮 RL</tspan></text><line x1="183.5" y1="24.0" x2="190.5" y2="24.0" class="arrow"/><path class="arrow-head" d="M196.5,24.0 L190.2,27.0 L190.2,21.0 Z"/><rect x="298.5" y="8.0" width="80" height="32" rx="8" class="box"/><text x="338.5" y="28.5" font-size="12.5" text-anchor="middle" class="t-strong"><tspan lang="en">Paired eval</tspan><tspan lang="zh-CN">配对评测</tspan></text><line x1="282.5" y1="24.0" x2="289.5" y2="24.0" class="arrow"/><path class="arrow-head" d="M295.5,24.0 L289.2,27.0 L289.2,21.0 Z"/><path class="arrow" d="M199.5,40 L7.5,60.0 M279.5,40 L372.5,60.0"/><circle cx="17.5" cy="74.0" r="4.6" class="dot s3"/><circle cx="60.6" cy="74.0" r="4.8" class="dot s3"/><line x1="25.5" y1="74.0" x2="52.6" y2="74.0" class="grid"/><circle cx="103.8" cy="74.0" r="7.6" class="dot s1"/><line x1="68.6" y1="74.0" x2="95.8" y2="74.0" class="grid"/><circle cx="146.9" cy="74.0" r="5.0" class="dot s3"/><line x1="111.8" y1="74.0" x2="138.9" y2="74.0" class="grid"/><circle cx="190.0" cy="74.0" r="4.4" class="dot s3"/><line x1="154.9" y1="74.0" x2="182.0" y2="74.0" class="grid"/><circle cx="233.1" cy="74.0" r="4.8" class="dot s3"/><line x1="198.0" y1="74.0" x2="225.1" y2="74.0" class="grid"/><circle cx="276.2" cy="74.0" r="7.4" class="dot s1"/><line x1="241.1" y1="74.0" x2="268.2" y2="74.0" class="grid"/><circle cx="319.4" cy="74.0" r="5.2" class="dot s3"/><line x1="284.2" y1="74.0" x2="311.4" y2="74.0" class="grid"/><circle cx="362.5" cy="74.0" r="6.4" class="dot s1"/><line x1="327.4" y1="74.0" x2="354.5" y2="74.0" class="grid"/><text x="7.5" y="106.0" font-size="11.5" class="t-muted"><tspan lang="en">one outcome reward → credit for each step, compared within the same state</tspan><tspan lang="zh-CN">一个结局奖励 → 同一状态下比较，给每一步分配信用</tspan></text></svg><!-- /fig:card-scr --></div>
+        <h3><a href="projects/stepcredit-rl.html">StepCredit-RL</a></h3>
+        <p class="sub"><span lang="en">SFT → agentic RL for multi-turn tool-calling agents</span><span lang="zh-CN">多轮工具调用 Agent 的 SFT → Agentic RL 全流程</span></p>
+        <p class="desc"><span lang="en">Expert demonstrations, SFT, multi-turn RL and paired evaluation. RL adopts a step-level relative advantage that compares actions taken from the same environment state, so the agent learns which steps mattered without a critic or extra rollouts.</span><span lang="zh-CN">专家示范 → SFT → 多轮 RL → 配对评测。RL 采用按相同环境状态分组的步级相对优势，不需要 critic 和额外 rollout，就能区分哪一步是关键动作。</span></p>
+        <div class="stats">
+          <div class="stat"><div class="v">98.6% / 94.0%</div><div class="k"><span lang="en">ALFWorld success (seen / unseen) after SFT + 100 RL steps</span><span lang="zh-CN">ALFWorld 成功率（seen / unseen），SFT 后 RL 100 步</span></div></div>
+          <div class="stat"><div class="v">82.9% <span class="arrow">vs</span> 70.7%</div><div class="k"><span lang="en">vs GRPO at 200 steps (seen, p = 0.006)</span><span lang="zh-CN">同条件对比 GRPO，200 步（seen，p = 0.006）</span></div></div>
+        </div>
+        <div class="tags"><span class="tag">Qwen3-4B</span><span class="tag">Agent-R1 (veRL + vLLM)</span><span class="tag">ALFWorld · HotpotQA</span><span class="tag">2025.09 – 2025.12</span></div>
+        <div class="card-links"><a href="projects/stepcredit-rl.html"><span lang="en">Project report →</span><span lang="zh-CN">项目报告 →</span></a><a href="https://github.com/Hey-Chillax/stepcredit-rl"><span lang="en">Code ↗</span><span lang="zh-CN">代码 ↗</span></a></div>
+      </article>
+
+    </div>
+    <p class="note" style="margin-top:14px"><span lang="en">All numbers are my own measurements from single-seed runs; each report lists the setup and the methods and code it builds on.</span><span lang="zh-CN">所有数字都是我自己的实测，均为单种子；每份报告都写明了实验设置，以及所采用的方法和代码出处。</span></p>
+  </section>
+
+  <section id="publications" aria-labelledby="pubs-title">
+    <h2 class="section-title" id="pubs-title"><span lang="en">Publications</span><span lang="zh-CN">论文</span></h2>
+    <p class="pub-note"><span lang="en">Undergraduate research on nonlinear Thomson scattering in strong laser fields. All first-authored.</span><span lang="zh-CN">本科阶段的研究：强激光场中的非线性汤姆孙散射。以下均为第一作者。</span></p>
+    <ol class="pubs">
+      <li>
+        <div class="title">Zeptosecond-Yoctosecond Pulses Generated by Nonlinear Inverse Thomson Scattering: Modulation and Spatiotemporal Properties</div>
+        <div class="authors"><span class="me">Yi Zhang</span>, Qingyu Yang, Jihong Wang, Xiaotian Gong, Youwei Tian</div>
+        <div class="venue"><em>Applied Sciences</em> 14(16): 7038, 2024 <span class="pill">SCI</span> · <a class="doi" href="https://doi.org/10.3390/app14167038">doi:10.3390/app14167038</a></div>
+      </li>
+      <li>
+        <div class="title">Optimum beam waist radius under applied magnetic field for optimal radiation properties of nonlinear Thomson scattering</div>
+        <div class="authors"><span class="me">Yi Zhang</span>, Haokai Wang, Feiyang Gu, Yubo Wang, Xingyu Li, Qingyu Yang, Youwei Tian</div>
+        <div class="venue"><em>Applied Physics B</em> 130(3): 43, 2024 <span class="pill">SCI</span> · <a class="doi" href="https://doi.org/10.1007/s00340-024-08178-0">doi:10.1007/s00340-024-08178-0</a></div>
+      </li>
+      <li>
+        <div class="title">Ripple and Lotus Phenomenon: Radiation Pattern Evolution of Nonlinear Thomson Scattering Under Cooperative and Competitive Effects of Applied Magnetic and Laser Field</div>
+        <div class="authors"><span class="me">Yi Zhang</span>, Feiyang Gu, Haokai Wang, Qingyu Yang, Yubo Wang, Xingyu Li, Youwei Tian</div>
+        <div class="venue"><em>IEEE Photonics Journal</em> 16(5): 1–12, 2024 <span class="pill">SCI</span> · <a class="doi" href="https://doi.org/10.1109/JPHOT.2024.3438237">doi:10.1109/JPHOT.2024.3438237</a></div>
+      </li>
+      <li>
+        <div class="title">Influence of optical property parameters on the emission patterns and spatio-temporal properties of nonlinear Thomson scattering</div>
+        <div class="authors"><span class="me">Yi Zhang</span>, Haokai Wang, Feiyang Gu, Xingyu Li, Qingyu Yang, Yubo Wang, Youwei Tian</div>
+        <div class="venue"><em>Journal of the Optical Society of America B</em> 41(9): 2181–2189, 2024 <span class="pill">SCI</span> · <a class="doi" href="https://doi.org/10.1364/JOSAB.528405">doi:10.1364/JOSAB.528405</a></div>
+      </li>
+      <li>
+        <div class="title">Study on radiation characteristics of energetic electrons driven by circularly polarized intense laser pulse</div>
+        <div class="authors"><span class="me">Yi Zhang</span>, Haokai Wang, Feiyang Gu, Youwei Tian</div>
+        <div class="venue"><em>Proc. SPIE 12792, Eighteenth National Conference on Laser Technology and Optoelectronics</em>, 2023 <span class="pill">EI</span> · <a class="doi" href="https://doi.org/10.1117/12.2688371">doi:10.1117/12.2688371</a></div>
+      </li>
+    </ol>
+    <p><a href="https://scholar.google.com/citations?user=SpbemaUAAAAJ"><span lang="en">All papers on Google Scholar →</span><span lang="zh-CN">Google Scholar 上的全部论文 →</span></a></p>
+  </section>
+
+  <section id="education" aria-labelledby="edu-title">
+    <h2 class="section-title" id="edu-title"><span lang="en">Education &amp; Honors</span><span lang="zh-CN">教育与荣誉</span></h2>
+    <div class="edu">
+      <div class="edu-item">
+        <div class="row">
+          <div><span class="school"><span lang="en">Nanjing University</span><span lang="zh-CN">南京大学</span></span><span class="degree"><span lang="en">M.S., Communication Engineering</span><span lang="zh-CN">通信工程 · 硕士</span></span></div>
+          <div class="date">2025.09 – 2028.06</div>
+        </div>
+        <ul class="plain">
+          <li><span lang="en"><strong>National First Prize</strong> in the “Challenge Cup” national student competition</span><span lang="zh-CN"><strong>“挑战杯”全国一等奖</strong></span></li>
+          <li><span lang="en">First-Class Academic Scholarship · Insta360 Innovation Scholarship</span><span lang="zh-CN">一等学业奖学金 · 影石创新奖学金</span></li>
+        </ul>
+      </div>
+      <div class="edu-item">
+        <div class="row">
+          <div><span class="school"><span lang="en">Nanjing University of Posts and Telecommunications</span><span lang="zh-CN">南京邮电大学</span></span><span class="degree"><span lang="en">B.Eng., Communication Engineering</span><span lang="zh-CN">通信工程 · 本科</span></span></div>
+          <div class="date">2021.09 – 2025.06</div>
+        </div>
+        <ul class="plain">
+          <li><span lang="en">Ranked <strong>1/541</strong> · <strong>National Scholarship</strong> · Xiaomi Special Scholarship · CET-6</span><span lang="zh-CN">排名 <strong>1/541</strong> · <strong>国家奖学金</strong> · 小米特等奖学金 · CET-6</span></li>
+          <li><span lang="en">4 first-author SCI papers and 1 EI paper (see above)</span><span lang="zh-CN">第一作者 SCI 论文 4 篇、EI 论文 1 篇（见上）</span></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section id="skills" aria-labelledby="skills-title">
+    <h2 class="section-title" id="skills-title"><span lang="en">Skills</span><span lang="zh-CN">技能</span></h2>
+    <dl class="skills">
+      <dt><span lang="en">Models &amp; architectures</span><span lang="zh-CN">模型与架构</span></dt>
+      <dd>Qwen3-VL, Qwen3.5, Qwen3.8-Flash-Next, DeepSeek-V3.2 (MLA, DSA), DeepSeek-V4 (mHC, CSA / HCA), Mamba-3; MoE, DiT, TTT, Loop Transformer</dd>
+      <dt><span lang="en">Multimodal</span><span lang="zh-CN">多模态</span></dt>
+      <dd><span lang="en">Modality alignment and multi-stage training, data mixture and cleaning, MLLM architecture changes, visual-token compression and frame selection, MRoPE</span><span lang="zh-CN">模态对齐与多阶段训练、数据配比与清洗、MLLM 架构改造、视觉 Token 压缩与帧选择、MRoPE</span></dd>
+      <dt><span lang="en">Post-training &amp; agents</span><span lang="zh-CN">后训练与 Agent</span></dt>
+      <dd><span lang="en">SFT, PPO, GRPO, DPO, OPD, reward design; agentic RL (credit assignment); agent harness, MCP, skills</span><span lang="zh-CN">SFT、PPO、GRPO、DPO、OPD、奖励设计；Agentic RL（Credit Assignment）；Agent Harness、MCP、Skills</span></dd>
+      <dt><span lang="en">Training systems</span><span lang="zh-CN">训练工程</span></dt>
+      <dd><span lang="en">FSDP2, veRL, multi-GPU distributed and mixed-precision training; Slurm clusters, <strong>16,000+ H100 GPU hours</strong></span><span lang="zh-CN">FSDP2、veRL、多卡分布式训练、混合精度；擅长 Slurm 集群，累计 <strong>16,000+ H100 GPU 小时</strong></span></dd>
+      <dt><span lang="en">Inference</span><span lang="zh-CN">推理优化</span></dt>
+      <dd><span lang="en">vLLM, FlashAttention, speculative decoding (MTP, DFlash), KV-cache pruning</span><span lang="zh-CN">vLLM、Flash Attention、投机解码（MTP、DFlash）、KV Cache Pruning</span></dd>
+    </dl>
+  </section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <span>© 2026 Yi Zhang · <span lang="en">Last updated 2026-11-14</span><span lang="zh-CN">更新于 2026-11-14</span></span>
+    <a href="https://github.com/Hey-Chillax/hey-chillax.github.io"><span lang="en">Source on GitHub</span><span lang="zh-CN">网站源码</span></a>
+  </div>
+</footer>
+<script src="assets/js/site.js" defer></script>
+</body>
+</html>
