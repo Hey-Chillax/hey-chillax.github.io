@@ -9,6 +9,7 @@ headings actually use.
 """
 import argparse
 import html
+import json
 import pathlib
 import re
 import subprocess
@@ -100,6 +101,21 @@ def build_fonts(texlive):
     chars = heading_chars()
     print(f'serif CJK characters: {len(chars)}')
     subset(CJK_SERIF, FONTS / 'NotoSerifSC-Bold.subset.woff2', text=chars, font_number=sc_font_number(CJK_SERIF))
+    write_font_widths()
+
+
+def write_font_widths():
+    """Advance widths of the sans subsets, which tools/figlib.py uses to lay out chart text."""
+    from fontTools.ttLib import TTFont
+    widths = {}
+    for weight, name in [('400', 'YZSans-Regular.woff2'), ('600', 'YZSans-Semibold.woff2')]:
+        font = TTFont(FONTS / name)
+        upm, hmtx = font['head'].unitsPerEm, font['hmtx']
+        widths[weight] = {chr(cp): round(hmtx[g][0] / upm, 4) for cp, g in font.getBestCmap().items() if cp < 0x2e80}
+    out = ROOT / 'tools' / 'data' / 'font_widths.json'
+    note = 'Advance widths in em of the YZ Sans subsets (Source Sans 3); written by tools/make_assets.py, read by tools/figlib.py.'
+    out.write_text(json.dumps({'note': note, 'widths': widths}, ensure_ascii=False, separators=(',', ':')), encoding='utf-8')
+    print(f'{out.name}: {len(widths["400"])} characters')
 
 
 def rounded(im, radius):
@@ -110,20 +126,26 @@ def rounded(im, radius):
     return out
 
 
+def crop_box(im, box):
+    """box = (x0, y0, x1, y1) as fractions of the image size."""
+    x0, y0, x1, y1 = box
+    return im.crop((int(x0 * im.width), int(y0 * im.height), int(x1 * im.width), int(y1 * im.height)))
+
+
+# Crop of "ID photo/Life photo.png" (3024 x 4032): head, waving hand and shoulders, without the neighbours.
+PORTRAIT_BOX = (0.2074, 0.2278, 0.4889, 0.4917)   # 4:5
+AVATAR_BOX = (0.2815, 0.2222, 0.4963, 0.3833)     # 1:1, face centred
+
+
 def build_images(photo, texlive):
     IMG.mkdir(parents=True, exist_ok=True)
     src = ImageOps.exif_transpose(Image.open(photo)).convert('RGB')
-    w, h = src.size
-    target = 3 / 4
-    if w / h > target:                       # crop to 3:4 around the centre
-        nw = int(h * target)
-        src = src.crop(((w - nw) // 2, 0, (w - nw) // 2 + nw, h))
-    elif w / h < target:
-        nh = int(w / target)
-        src = src.crop((0, 0, w, nh))
-    pic = src.resize((360, 480), Image.LANCZOS)
+    portrait = crop_box(src, PORTRAIT_BOX)
+    pic = portrait.resize((400, 500), Image.LANCZOS)
     pic.save(IMG / 'photo.jpg', quality=86, optimize=True, progressive=True)
-    print('photo.jpg', (IMG / 'photo.jpg').stat().st_size // 1024, 'KB')
+    avatar = crop_box(src, AVATAR_BOX).resize((460, 460), Image.LANCZOS)
+    avatar.save(IMG / 'avatar.jpg', quality=88, optimize=True, progressive=True)
+    print('photo.jpg', (IMG / 'photo.jpg').stat().st_size // 1024, 'KB; avatar.jpg', (IMG / 'avatar.jpg').stat().st_size // 1024, 'KB')
 
     t = pathlib.Path(texlive)
     serif = ImageFont.truetype(str(t / 'sourceserif' / 'SourceSerif4-Semibold.otf'), 84)
@@ -141,8 +163,8 @@ def build_images(photo, texlive):
     d.text((88, 326), 'M.S. student, Nanjing University', font=sans, fill=(71, 80, 92))
     d.text((88, 420), 'Looking for an LLM algorithm internship', font=sans_b, fill=ACCENT)
     d.text((88, 466), 'hey-chillax.github.io', font=sans, fill=(107, 115, 128))
-    face = rounded(src.resize((300, 400), Image.LANCZOS), 22)
-    card.paste(face, (820, 115), face)
+    face = rounded(portrait.resize((328, 410), Image.LANCZOS), 24)
+    card.paste(face, (808, 110), face)
     card.save(IMG / 'og.png', optimize=True)
     print('og.png', (IMG / 'og.png').stat().st_size // 1024, 'KB')
 
@@ -161,7 +183,7 @@ def build_images(photo, texlive):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument('--photo', help='portrait to use (cropped to 3:4)')
+    ap.add_argument('--photo', help='the original life photo; PORTRAIT_BOX and AVATAR_BOX choose the crops')
     ap.add_argument('--texlive-fonts', required=True, help='…/texmf-dist/fonts/opentype/adobe (Source Serif 4 / Source Sans 3)')
     ap.add_argument('--fonts-only', action='store_true')
     a = ap.parse_args()
