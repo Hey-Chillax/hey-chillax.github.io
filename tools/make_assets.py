@@ -113,7 +113,11 @@ def write_font_widths():
         upm, hmtx = font['head'].unitsPerEm, font['hmtx']
         widths[weight] = {chr(cp): round(hmtx[g][0] / upm, 4) for cp, g in font.getBestCmap().items() if cp < 0x2e80}
     out = ROOT / 'tools' / 'data' / 'font_widths.json'
-    note = 'Advance widths in em of the YZ Sans subsets (Source Sans 3); written by tools/make_assets.py, read by tools/figlib.py.'
+    if out.exists():   # keep tables this function does not write (e.g. the hand-drawn diagram face)
+        old = json.loads(out.read_text(encoding='utf-8'))['widths']
+        widths = {**old, **widths}
+    note = ('Advance widths in em: 400/600 = YZ Sans (Source Sans 3) subsets, written by tools/make_assets.py; '
+            'hand400/hand700 = Comic Neue, the hand-drawn diagram face. Read by tools/figlib.py.')
     out.write_text(json.dumps({'note': note, 'widths': widths}, ensure_ascii=False, separators=(',', ':')), encoding='utf-8')
     print(f'{out.name}: {len(widths["400"])} characters')
 

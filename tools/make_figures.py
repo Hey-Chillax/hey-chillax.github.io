@@ -35,7 +35,7 @@ def markup(name):
     fn, table = figures.FIGS[name]
     if name in figures.CARDS:
         return fn().render()
-    out = fn(LG).render('v-lg') + fn(SM).render('v-sm')
+    out = fn(figures.WIDE.get(name, LG)).render('v-lg') + fn(SM).render('v-sm')
     return out + (table() if table else '')
 
 
@@ -55,12 +55,22 @@ def inject():
 # ----------------------------------------------------------------------------- standalone export
 FONT = "'Source Sans 3', 'Source Sans Pro', 'Noto Sans CJK SC', 'Source Han Sans SC', 'Microsoft YaHei', 'PingFang SC', sans-serif"
 PALETTES = {   # the .viz colour tokens of assets/css/site.css, light and dark
-    'light': dict(ink='#1a1f26', ink2='#444d59', muted='#6b7380', faint='#8a919c', accent='#2d5a96', on='#ffffff',
-                  s1='#2d5a96', s2='#b5812e', s3='#a7adb6', bg='#ffffff', bg_soft='#f5f7fa', line='#e3e7ec',
-                  accent_soft='#eef3fa', grid='#eaedf1', axis='#c5cad2', wash1=('#2d5a96', '0.10'), wash2=('#b5812e', '0.12')),
+    'light': dict(ink='#1a1f26', ink2='#444d59', muted='#5e6773', faint='#8a919c', accent='#2d5a96', on='#ffffff',
+                  s1='#3b73b9', s2='#c9741a', s3='#a7adb6', bg='#ffffff', bg_soft='#f5f7fa', line='#e3e7ec',
+                  accent_soft='#eef3fa', grid='#eaedf1', axis='#c5cad2', wash1=('#3b73b9', '0.12'), wash2=('#c9741a', '0.12'),
+                  s4='#8a63b5', s5='#4e9338', sred='#c8524a',
+                  tones={'blue': ('#e4edf8', '#8caedc', '#2c5c99'), 'orange': ('#fbebd8', '#dfa864', '#9a5a12'),
+                         'purple': ('#efe8f6', '#b39bd3', '#6e4a96'), 'green': ('#e3f0dd', '#93c27e', '#3d7529'),
+                         'red': ('#fbe3e1', '#de9a94', '#a6413a'), 'yellow': ('#fff4cf', '#ddbf5e', '#856a0e'),
+                         'gray': ('#f3f4f6', '#c3c8cf', '#5f6873')}),
     'dark': dict(ink='#e8eaed', ink2='#bcc2cb', muted='#8f97a2', faint='#727a85', accent='#8db1e6', on='#111317',
-                 s1='#5b8fd6', s2='#b5812e', s3='#6a717c', bg='#111317', bg_soft='#181b20', line='#2a2f37',
-                 accent_soft='#19222f', grid='#23272e', axis='#3b424c', wash1=('#5b8fd6', '0.16'), wash2=('#b5812e', '0.16')),
+                 s1='#5b8fd6', s2='#c98026', s3='#6a717c', bg='#111317', bg_soft='#181b20', line='#2a2f37',
+                 accent_soft='#19222f', grid='#23272e', axis='#3b424c', wash1=('#5b8fd6', '0.18'), wash2=('#c98026', '0.18'),
+                 s4='#9a7bcb', s5='#5e9e48', sred='#d9736b',
+                 tones={'blue': ('#1b2738', '#3f6496', '#a9c6f0'), 'orange': ('#33261a', '#8f6125', '#f0c27e'),
+                        'purple': ('#2a2334', '#6f5994', '#cdb8ea'), 'green': ('#1e2b1c', '#4c7a3c', '#a9d898'),
+                        'red': ('#36201f', '#9a5550', '#f0a7a0'), 'yellow': ('#352e17', '#8f7a2c', '#ead487'),
+                        'gray': ('#1e2227', '#444b55', '#aeb5bf')}),
 }
 
 
@@ -88,6 +98,14 @@ def style_for(theme):
         'leader': {'stroke': p['faint'], 'stroke-width': '1', 'fill': 'none'},
         'tok-s': {'fill': p['s3']}, 'tok-t': {'fill': p['s1']},
         'ring': {'fill': 'none', 'stroke': p['accent'], 'stroke-width': '1.4'},
+        's4': {'fill': p['s4']}, 's5': {'fill': p['s5']}, 's-red': {'fill': p['sred']},
+        'l4': {'stroke': p['s4']}, 'l5': {'stroke': p['s5']}, 'l-red': {'stroke': p['sred']},
+        'dash': {'stroke-dasharray': '5 4'}, 'ink': {'fill': p['ink']}, 'ink-line': {'stroke': p['ink2'], 'fill': 'none'},
+        'math': {'font-family': "'Times New Roman', 'Noto Serif', serif", 'font-style': 'italic'},
+        **{f'pn-{k}': {'fill': a, 'stroke': b, 'stroke-width': '1.2'} for k, (a, b, c) in p['tones'].items()},
+        **{f'fl-{k}': {'fill': a} for k, (a, b, c) in p['tones'].items()},
+        **{f'ln-{k}': {'stroke': b, 'fill': 'none'} for k, (a, b, c) in p['tones'].items()},
+        **{f'tx-{k}': {'fill': c} for k, (a, b, c) in p['tones'].items()},
     }
 
 
@@ -98,9 +116,10 @@ def font_faces():
     """@font-face rules with the site's sans subsets inlined, so the file renders the same anywhere (e.g. as an <img>)."""
     import base64
     rules = []
-    for weight, name in [(400, 'YZSans-Regular.woff2'), (600, 'YZSans-Semibold.woff2')]:
+    for family, weight, name in [('YZ Sans', 400, 'YZSans-Regular.woff2'), ('YZ Sans', 600, 'YZSans-Semibold.woff2'),
+                                 ('YZ Hand', 400, 'ComicNeue-Regular.woff2'), ('YZ Hand', 700, 'ComicNeue-Bold.woff2')]:
         data = base64.b64encode((ROOT / 'assets' / 'fonts' / name).read_bytes()).decode()
-        rules.append(f"@font-face{{font-family:'YZ Sans';font-weight:{weight};src:url(data:font/woff2;base64,{data}) format('woff2')}}")
+        rules.append(f"@font-face{{font-family:'{family}';font-weight:{weight};src:url(data:font/woff2;base64,{data}) format('woff2')}}")
     return ''.join(rules)
 
 
@@ -110,6 +129,7 @@ def standalone(svg_text, lang, theme='light', embed_fonts=False):
     root = ET.fromstring(svg_text)   # our own markup from figures.py, never outside input
     keep = 'en' if lang == 'en' else 'zh-CN'
     style = style_for(theme)
+    hand_root = 'hand' in root.get('class', '').split()
 
     def prune(el):
         for child in list(el):
@@ -133,7 +153,8 @@ def standalone(svg_text, lang, theme='light', embed_fonts=False):
         for child in list(g):
             if child.tag.endswith('g') and len(child) == 0:
                 g.remove(child)
-    root.set('font-family', ("'YZ Sans', " if embed_fonts else '') + FONT)
+    face = ("'YZ Hand', 'Comic Neue', 'Comic Sans MS', " if hand_root else '') + ("'YZ Sans', " if embed_fonts else '') + FONT
+    root.set('font-family', face)
     root.attrib.pop('role', None)
     if embed_fonts:
         st = ET.Element(f'{{{SVG_NS}}}style')
@@ -150,7 +171,7 @@ def export(out, theme='light', embed_fonts=False, names=None):
         (out / lang).mkdir(parents=True, exist_ok=True)
         for name in names:
             fn = figures.FIGS[name][0]
-            svg = fn() if name in figures.CARDS else fn(LG)
+            svg = fn() if name in figures.CARDS else fn(figures.WIDE.get(name, LG))
             (out / lang / f'{name}{suffix}.svg').write_text(standalone(svg.render(), lang, theme, embed_fonts) + '\n', encoding='utf-8')
     print(f'exported {len(names)} figures × 2 languages ({theme} theme) to {out}')
 

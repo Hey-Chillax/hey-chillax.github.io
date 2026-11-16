@@ -26,21 +26,29 @@ def T(en, zh=None):
 FONT_W = json.loads((DATA / 'font_widths.json').read_text())['widths']
 
 
-def text_w(s, size, weight=400):
-    """Width of a string set in the site's sans (YZ Sans = Source Sans 3; CJK falls back to a full-width font)."""
-    table = FONT_W['600' if weight >= 600 else '400']
+def text_w(s, size, weight=400, hand=False):
+    """Width of a string in the site's sans (YZ Sans = Source Sans 3) or, with hand=True, the hand-drawn diagram face
+    (Comic Neue); CJK falls back to a full-width font."""
+    if hand:
+        table = FONT_W['hand700' if weight >= 600 else 'hand400']
+    else:
+        table = FONT_W['600' if weight >= 600 else '400']
     return size * sum(1.0 if ord(ch) > 0x2e80 else table.get(ch, 0.5) for ch in s)
 
 
-def width_of(t, size, weight=400):
+def width_of(t, size, weight=400, hand=False):
     if isinstance(t, tuple):
-        return max(text_w(t[0], size, weight), text_w(t[1], size, weight))
-    return text_w(t, size, weight)
+        return max(text_w(t[0], size, weight, hand), text_w(t[1], size, weight, hand))
+    return text_w(t, size, weight, hand)
 
 
 class Svg:
-    def __init__(self, w, h, label):
-        self.w, self.h, self.label, self.parts = w, h, label, []
+    def __init__(self, w, h, label, hand=False):
+        self.w, self.h, self.label, self.parts, self.hand = w, h, label, [], hand
+
+    def tw(self, s, size, weight=400):
+        """Text width in this figure's face."""
+        return width_of(s, size, weight, self.hand)
 
     def add(self, s):
         self.parts.append(s)
@@ -79,7 +87,7 @@ class Svg:
         self.add(f'<g class="mark"><title>{esc(title)}</title>{inner}</g>')
 
     def render(self, variant=''):
-        cls = 'viz' + (' ' + variant if variant else '')
+        cls = 'viz' + (' hand' if self.hand else '') + (' ' + variant if variant else '')
         return (f'<svg class="{cls}" viewBox="0 0 {self.w} {self.h:.0f}" width="{self.w}" height="{self.h:.0f}" role="img" '
                 f'aria-label="{html.escape(self.label, quote=True)}" xmlns="http://www.w3.org/2000/svg">'
                 + ''.join(self.parts) + '</svg>')
