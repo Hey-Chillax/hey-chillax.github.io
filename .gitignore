@@ -2,3 +2,6 @@ __pycache__/
 tools/lab/gallery.html
 tools/lab/final.html
 tools/lab/rounds.html
+tools/lab/c_rounds.html
+tools/drawio/__pycache__/
+tools/lab/d_rounds.html

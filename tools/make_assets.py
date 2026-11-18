@@ -5,6 +5,10 @@ Needs Pillow, fontTools and brotli (pip install pillow fonttools brotli). Run it
 changing the photo or any heading text: the Chinese serif font is subset to the characters the
 headings actually use.
 
+The page text face (since 2026-11-18, the user's pick "G"): Noto Serif for Latin and Noto Serif SC for
+Chinese, both subset. The Chinese subset holds every CJK character on the pages, so run
+`python tools/make_assets.py --text-fonts` again after adding Chinese text.
+
     python tools/make_assets.py --photo /path/to/photo.jpg --texlive-fonts /path/to/texmf-dist/fonts/opentype/adobe
 """
 import argparse
@@ -24,6 +28,8 @@ ACCENT = (45, 90, 150)
 LATIN = ('U+0020-007E,U+00A0-00FF,U+0131,U+0152-0153,U+02C6,U+02DA,U+02DC,U+2010-2027,U+2030-203A,'
          'U+2044,U+20AC,U+2122,U+2190-2199,U+2212,U+2248,U+2260,U+2264-2265,U+FEFF,U+FFFD')
 CJK_SERIF = '/usr/share/fonts/opentype/noto/NotoSerifCJK-Bold.ttc'
+NOTO = pathlib.Path('/usr/share/fonts/truetype/noto')          # Noto Serif (Latin), static TTFs
+NOTO_CJK = pathlib.Path('/usr/share/fonts/opentype/noto')      # Noto Serif CJK collections
 
 
 def subset(src, out, unicodes=None, text=None, font_number=None):
@@ -104,6 +110,28 @@ def build_fonts(texlive):
     write_font_widths()
 
 
+def page_chars():
+    """Every CJK character (and CJK punctuation) in the pages' source, attributes included."""
+    chars = set()
+    for page in [ROOT / 'index.html', *sorted((ROOT / 'projects').glob('*.html'))]:
+        for ch in html.unescape(page.read_text(encoding='utf-8')):
+            if ord(ch) >= 0x2e80:
+                chars.add(ch)
+    return ''.join(sorted(chars)) + '（）：；、，。！？“”‘’《》【】—…·'
+
+
+def build_text_fonts():
+    """The page text face "YZ Text" / "YZ Text SC": subsets of Noto Serif and Noto Serif SC (SIL OFL 1.1)."""
+    FONTS.mkdir(parents=True, exist_ok=True)
+    for style in ('Regular', 'Italic', 'SemiBold'):
+        subset(NOTO / f'NotoSerif-{style}.ttf', FONTS / f'NotoSerif-{style}.subset.woff2', unicodes=LATIN)
+    chars = page_chars()
+    print(f'text CJK characters: {len(chars)}')
+    for style in ('Regular', 'SemiBold'):
+        src = NOTO_CJK / f'NotoSerifCJK-{style}.ttc'
+        subset(src, FONTS / f'NotoSerifSC-{style}.subset.woff2', text=chars, font_number=sc_font_number(str(src)))
+
+
 def write_font_widths():
     """Advance widths of the sans subsets, which tools/figlib.py uses to lay out chart text."""
     from fontTools.ttLib import TTFont
@@ -136,8 +164,9 @@ def crop_box(im, box):
     return im.crop((int(x0 * im.width), int(y0 * im.height), int(x1 * im.width), int(y1 * im.height)))
 
 
-# Crop of "ID photo/Life photo.png" (3024 x 4032): head, waving hand and shoulders, without the neighbours.
-PORTRAIT_BOX = (0.2074, 0.2278, 0.4889, 0.4917)   # 4:5
+# Crop of "ID photo/Life photo.png" (3024 x 4032): half body with the Iron Man next to him (option C, chosen 2026-11-17).
+PORTRAIT_BOX = (0.1944, 0.2083, 0.8167, 0.6750)   # 1:1
+PORTRAIT_SIZE = (560, 560)
 AVATAR_BOX = (0.2815, 0.2222, 0.4963, 0.3833)     # 1:1, face centred
 
 
@@ -145,7 +174,7 @@ def build_images(photo, texlive):
     IMG.mkdir(parents=True, exist_ok=True)
     src = ImageOps.exif_transpose(Image.open(photo)).convert('RGB')
     portrait = crop_box(src, PORTRAIT_BOX)
-    pic = portrait.resize((400, 500), Image.LANCZOS)
+    pic = portrait.resize(PORTRAIT_SIZE, Image.LANCZOS)
     pic.save(IMG / 'photo.jpg', quality=86, optimize=True, progressive=True)
     avatar = crop_box(src, AVATAR_BOX).resize((460, 460), Image.LANCZOS)
     avatar.save(IMG / 'avatar.jpg', quality=88, optimize=True, progressive=True)
@@ -188,10 +217,17 @@ def build_images(photo, texlive):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--photo', help='the original life photo; PORTRAIT_BOX and AVATAR_BOX choose the crops')
-    ap.add_argument('--texlive-fonts', required=True, help='…/texmf-dist/fonts/opentype/adobe (Source Serif 4 / Source Sans 3)')
+    ap.add_argument('--texlive-fonts', help='…/texmf-dist/fonts/opentype/adobe (Source Serif 4 / Source Sans 3)')
     ap.add_argument('--fonts-only', action='store_true')
+    ap.add_argument('--text-fonts', action='store_true', help='only rebuild the page text face (Noto Serif / Noto Serif SC subsets)')
     a = ap.parse_args()
+    if a.text_fonts:
+        build_text_fonts()
+        return
+    if not a.texlive_fonts:
+        raise SystemExit('--texlive-fonts is required unless --text-fonts')
     build_fonts(a.texlive_fonts)
+    build_text_fonts()
     if not a.fonts_only:
         if not a.photo:
             raise SystemExit('--photo is required unless --fonts-only')

@@ -107,5 +107,12 @@ TABLES = {'opd-budget': opd_budget_table, 'opd-training': opd_training_table, 'o
           'scr-sft-rl': scr_sft_rl_table, 'scr-vs-grpo': scr_vs_grpo_table, 'scr-updates': scr_updates_table,
           'scr-hotpotqa': scr_hotpotqa_table}
 FIGS = {name: (final(name), TABLES.get(name)) for name in PICKS3}
+# 2026-11-17: the eight data charts went through a new cycle of three rounds (tools/lab/c1.py, c2.py, c3.py; picks in
+# tools/lab/c_final.py). Figure 6 (opd-compute) restarted from the 11-15 drawing, which the user preferred.
+# 2026-11-17 (second cycle, English only): three more rounds in tools/lab/d1.py, d2.py, d3.py; picks in tools/lab/d_final.py.
+import d_final  # noqa: E402
+for _name, _fn in d_final.FINAL.items():
+    FIGS[_name] = (_fn, TABLES.get(_name))
 CARDS = {'card-opd', 'card-scr'}
+DRAWIO_FIGS = {'opd-takeover', 'scr-steplevel', 'opd-pipeline', 'scr-pipeline', 'card-opd', 'card-scr'}   # drawn in tools/drawio (2026-11-17)
 WIDE = {'opd-takeover': 880, 'scr-steplevel': 880}   # framework figures are drawn wider than the charts

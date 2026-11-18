@@ -31,11 +31,56 @@ PAGES = {
 }
 
 
+DRAWIO = ROOT / 'tools' / 'drawio' / 'out'
+
+
+def english_only(svg):
+    """Figures are shown in English in both page languages (user, 2026-11-17): drop every Chinese text run and group,
+    keep the English ones without their language tag. Captions and data tables stay bilingual."""
+    svg = re.sub(r'<tspan lang="zh-CN">.*?</tspan>', '', svg, flags=re.S)
+    svg = re.sub(r'<tspan lang="en">(.*?)</tspan>', r'\1', svg, flags=re.S)
+    out, i = [], 0
+    while True:
+        j = svg.find('<g lang="zh-CN">', i)
+        if j < 0:
+            out.append(svg[i:])
+            break
+        out.append(svg[i:j])
+        depth, k = 0, j
+        while True:                                   # skip to the matching </g>, counting nested groups
+            nxt_open = svg.find('<g', k + 1)
+            nxt_close = svg.find('</g>', k + 1)
+            if nxt_open != -1 and nxt_open < nxt_close and svg[nxt_open + 2] in ' >':
+                depth += 1
+                k = nxt_open
+            else:
+                if depth == 0:
+                    i = nxt_close + len('</g>')
+                    break
+                depth -= 1
+                k = nxt_close
+    return ''.join(out).replace('<g lang="en">', '<g>')
+
+
+def drawio_markup(name):
+    """Method diagrams and pipelines drawn in draw.io (tools/drawio): an English and a Chinese SVG, already made
+    inline-ready and theme-aware by tools/drawio/webify.py. None when they have not been exported yet."""
+    if name not in getattr(figures, 'DRAWIO_FIGS', ()):
+        return None
+    en = DRAWIO / f'{name}.en.svg'
+    if not en.exists():
+        return None
+    return f'<div class="dg">{en.read_text(encoding="utf-8").strip()}</div>'
+
+
 def markup(name):
     fn, table = figures.FIGS[name]
+    drawn = drawio_markup(name)
+    if drawn is not None:
+        return drawn + (table() if table else '')
     if name in figures.CARDS:
-        return fn().render()
-    out = fn(figures.WIDE.get(name, LG)).render('v-lg') + fn(SM).render('v-sm')
+        return english_only(fn().render())
+    out = english_only(fn(figures.WIDE.get(name, LG)).render('v-lg') + fn(SM).render('v-sm'))
     return out + (table() if table else '')
 
 
@@ -163,22 +208,43 @@ def standalone(svg_text, lang, theme='light', embed_fonts=False):
     return ET.tostring(root, encoding='unicode')
 
 
+def drawio_colours(theme):
+    """The --dg-* values of tools/drawio/diagram-colors.css: the first :root block is light, the one inside
+    @media (prefers-color-scheme: dark) is dark."""
+    css = (ROOT / 'tools' / 'drawio' / 'diagram-colors.css').read_text(encoding='utf-8')
+    blocks = re.findall(r':root\s*\{(.*?)\}', css, re.S)
+    body = blocks[0] if theme == 'light' else blocks[1]
+    return dict(re.findall(r'--dg-([a-z0-9-]+)\s*:\s*([^;]+);', body))
+
+
+def drawio_standalone(name, lang, theme='light'):
+    """A draw.io diagram for slides: the page SVG with its colour variables replaced by fixed colours. Its labels are
+    HTML (foreignObject), which browsers render but PowerPoint does not, so slides should use the PNG."""
+    colours = drawio_colours(theme)
+    svg = (DRAWIO / f'{name}.{lang}.svg').read_text(encoding='utf-8')
+    return re.sub(r'var\(--dg-([a-z0-9-]+)\)', lambda m: colours[m.group(1)].strip(), svg).strip()
+
+
 def export(out, theme='light', embed_fonts=False, names=None):
     out = pathlib.Path(out)
     names = names or list(figures.FIGS)
     suffix = '' if theme == 'light' else f'-{theme}'
-    for lang in ('en', 'zh'):
+    for lang in ('en',):                   # figures are English only since 2026-11-17 (user)
         (out / lang).mkdir(parents=True, exist_ok=True)
         for name in names:
+            target = out / lang / f'{name}{suffix}.svg'
+            if name in getattr(figures, 'DRAWIO_FIGS', ()) and (DRAWIO / f'{name}.{lang}.svg').exists():
+                target.write_text(drawio_standalone(name, lang, theme) + '\n', encoding='utf-8')
+                continue
             fn = figures.FIGS[name][0]
             svg = fn() if name in figures.CARDS else fn(figures.WIDE.get(name, LG))
-            (out / lang / f'{name}{suffix}.svg').write_text(standalone(svg.render(), lang, theme, embed_fonts) + '\n', encoding='utf-8')
-    print(f'exported {len(names)} figures × 2 languages ({theme} theme) to {out}')
+            target.write_text(standalone(svg.render(), lang, theme, embed_fonts) + '\n', encoding='utf-8')
+    print(f'exported {len(names)} figures (English, {theme} theme) to {out}/en')
 
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__.split('\n\n')[0])
-    ap.add_argument('--export', metavar='DIR', help='also write standalone SVG files to DIR/en and DIR/zh')
+    ap.add_argument('--export', metavar='DIR', help='also write standalone SVG files to DIR/en (figures are English only)')
     ap.add_argument('--theme', choices=['light', 'dark'], default='light', help='colours of the exported files (dark adds a -dark suffix)')
     ap.add_argument('--embed-fonts', action='store_true', help='inline the site font in exported files (for use as <img>)')
     ap.add_argument('--only', nargs='+', metavar='NAME', help='export only these figures')
