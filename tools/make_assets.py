@@ -164,9 +164,10 @@ def crop_box(im, box):
     return im.crop((int(x0 * im.width), int(y0 * im.height), int(x1 * im.width), int(y1 * im.height)))
 
 
-# Crop of "ID photo/Life photo.png" (3024 x 4032): half body with the Iron Man next to him (option C, chosen 2026-11-17).
-PORTRAIT_BOX = (0.1944, 0.2083, 0.8167, 0.6750)   # 1:1
-PORTRAIT_SIZE = (560, 560)
+# Crop of "ID photo/Life photo.png" (3024 x 4032): three-quarter length with the Iron Man next to him
+# (option B, chosen 2026-11-19 after comparing five crops on the page).
+PORTRAIT_BOX = (0.1723, 0.2042, 0.8390, 0.8292)   # 4:5
+PORTRAIT_SIZE = (560, 700)
 AVATAR_BOX = (0.2815, 0.2222, 0.4963, 0.3833)     # 1:1, face centred
 
 
@@ -196,8 +197,9 @@ def build_images(photo, texlive):
     d.text((88, 326), 'M.S. student, Nanjing University', font=sans, fill=(71, 80, 92))
     d.text((88, 420), 'Looking for an LLM algorithm internship', font=sans_b, fill=ACCENT)
     d.text((88, 466), 'hey-chillax.github.io', font=sans, fill=(107, 115, 128))
-    face = rounded(portrait.resize((328, 410), Image.LANCZOS), 24)
-    card.paste(face, (808, 110), face)
+    fw = round(410 * portrait.width / portrait.height)   # keep the crop's own aspect ratio (4:5 gives 328 x 410)
+    face = rounded(portrait.resize((fw, 410), Image.LANCZOS), 24)
+    card.paste(face, (1136 - fw, 110), face)
     card.save(IMG / 'og.png', optimize=True)
     print('og.png', (IMG / 'og.png').stat().st_size // 1024, 'KB')
 
