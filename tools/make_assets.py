@@ -193,7 +193,9 @@ def build_images(photo, texlive):
     d.text((86, 150), 'Yi Zhang', font=serif, fill=(27, 31, 36))
     nx = 86 + d.textlength('Yi Zhang', font=serif) + 22
     d.text((nx, 176), '张益', font=zh, fill=(107, 115, 128))
-    d.text((88, 278), 'LLM post-training · multimodal LLMs · agentic RL', font=sans, fill=(71, 80, 92))
+    # research areas, worded as the page title; at 32 px the line would run into the photo, so 28 px
+    tag = ImageFont.truetype(str(t / 'sourcesans' / 'SourceSans3-Regular.otf'), 28)
+    d.text((88, 280), 'Video Understanding & Post-Training & Efficient Inference', font=tag, fill=(71, 80, 92))
     d.text((88, 326), 'M.S. student, Nanjing University', font=sans, fill=(71, 80, 92))
     d.text((88, 420), 'Looking for an LLM algorithm internship', font=sans_b, fill=ACCENT)
     d.text((88, 466), 'hey-chillax.github.io', font=sans, fill=(107, 115, 128))
