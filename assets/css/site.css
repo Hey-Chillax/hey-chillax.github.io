@@ -674,3 +674,6 @@ figure.fig .fig-body { border-color: var(--line-soft); box-shadow: none; }
   .site-header, .lang-toggle, .toc, .toc-side { display: none; }
   body { font-size: 12pt; }
 }
+
+/* Emoji in running text (About Me greeting and contact line): use the system colour-emoji font. */
+.emoji { font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif; font-style: normal; }
