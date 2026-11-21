@@ -1,14 +1,15 @@
 """StepCredit-RL full pipeline: expert demonstrations -> SFT -> multi-turn RL (StepCredit-RL) -> paired evaluation,
 with ALFWorld success (seen / unseen) after each stage.
 
-Variants: r1a / r1i / r1m, r2a / r2i / r2m, r3a / r3i / r3m; rounds 4-6 (r4a ... r6m) English only; final: r6m.
+Variants: r1a / r1i / r1m, r2a / r2i / r2m, r3a / r3i / r3m; rounds 4-6 (r4a ... r6m) English only;
+r7m (2026-11-21) is the interview deck's final ported back; final: r7m.
 Facts (projects/stepcredit-rl.html, tools/data/alfworld_val.csv): the planner expert solves 2,145 of 3,553 training
 games (60.4%) within 20 steps, giving 22,810 step examples; SFT with the loss only on tool calls, one epoch (356 steps,
 about 1.4 h; data generation about 40 min more); RL 100 steps, 16 tasks x 8 rollouts per step, asynchronous vLLM
 rollouts; greedy validation and an exact McNemar test on the same tasks. Success: base 7.1 / 2.2, after SFT 67.1 / 67.2,
 RL step 20 98.6 / 91.0, step 100 98.6 / 94.0 (14.4 h into RL).
 """
-from dlib import Fig, INK, LEMON, MUTED, SKY, SLATE, WHITE, label_w, TIMES
+from dlib import Fig, INK, LEMON, MUTED, SKY, SLATE, WHITE, label_w, TIMES, web_w
 
 WIDTH = 720
 LABEL = ('StepCredit-RL pipeline: expert demonstrations, SFT, multi-turn RL with StepCredit-RL and paired evaluation, '
@@ -240,6 +241,8 @@ def build_r3(lang, takeaway=False):
 
 
 def build(v, lang):
+    if v == 'r7m':
+        return build7()
     if v[:2] in ('r4', 'r5', 'r6'):
         return {'r4a': build4a, 'r4i': build4i, 'r4m': build4m, 'r5a': build5a, 'r5i': build5i,
                 'r5m': lambda: build5a(named=True), 'r6a': build6, 'r6i': lambda: build6(times_in_boxes=True),
@@ -532,4 +535,83 @@ def build6(times_in_boxes=False):
     y2 = H - 20
     f.line([(xs[0], y2 - 22), (WIDTH - 6, y2 - 22)], color=SLATE['tok'], width=1, dashed=True, dash='3 3')
     two_object5(f, xs, ws, y2, lx)
+    return f
+
+
+# ------------------------------------------------------------------ round 7 (2026-11-21): the deck's final, ported back
+# The interview deck redrew this figure for its slide in three rounds (resume repo:
+# ppt_src/figures/drawio/fig_scr_pipeline.py, final r3m) and the user chose that version for the homepage too. r7m is
+# that layout at the homepage's width and type scale: the chart title with the seen / unseen key on one line; the RL
+# stage as two pairs, step 20 (pale, "Seen saturates") and step 100 (the result, heavier outline), so the plateau is
+# drawn; the hardware on the SFT note; and the two-object task as a panel under Paired Evaluation, set off by a dashed
+# rule, with the lesson level with the column labels. The panel is narrower than on the slide, so its heading takes
+# three lines.
+def column_pair7(f, cx, base, hh, seen, unseen, pal, cw=24, cg=6, bold=False, width=1.1, soft=False):
+    """Seen (filled) and unseen (outlined) columns centred on cx, values on top; soft: pale fill, muted values."""
+    for k, (v, solid) in enumerate(((seen, True), (unseen, False))):
+        x = cx - cw - cg / 2 + k * (cw + cg)
+        fill = (pal['soft'] if soft else pal['tok']) if solid else WHITE
+        f.box(x, base - hh * v / 100, cw, hh * v / 100, fill=fill, stroke=pal['line'], width=width, arc=2)
+        f.text(x + cw / 2, base - hh * v / 100 - 9, f'{v:.1f}', size=12, color=MUTED if soft else INK, anchor='c',
+               bold=bold)
+
+
+def legend7(f, x, y, sw=12):
+    """Chart title in bold, then the seen / unseen swatches on the same line (spaced with the page font's widths)."""
+    title = 'ALFWorld success (%)'
+    f.text(x, y, title, size=12.5, bold=True)
+    xx = x + web_w(title, 12.5, True) + 14
+    f.box(xx, y - sw / 2, sw, sw, fill=SKY['tok'], stroke=SKY['line'], width=1, arc=2)
+    f.text(xx + sw + 5, y, 'seen', size=12, color=MUTED)
+    xx += sw + 5 + web_w('seen', 12) + 12
+    f.box(xx, y - sw / 2, sw, sw, fill=WHITE, stroke=SKY['line'], width=1, arc=2)
+    f.text(xx + sw + 5, y, 'unseen', size=12, color=MUTED)
+
+
+def two_object7(f, px, pw, ty, base):
+    """The two-object task under Paired Evaluation: heading, the expert's coverage, SFT and RL bars on a 0-100 scale,
+    and the lesson level with the column labels."""
+    f.text(px, ty, 'Two-object task', size=12.5, bold=True)
+    f.text(px, ty + 16, '(seen + unseen)', size=12, color=MUTED)
+    f.text(px, ty + 32, 'The expert solves 55 of 813', size=12, color=MUTED)
+    bw, bh = pw - 38, 9
+    for k, (lab, v) in enumerate((('After SFT', 27), ('After 100 RL steps', 95))):
+        yy = ty + 64 + k * 32
+        f.text(px, yy - 13, lab, size=12, color=MUTED if k == 0 else INK, bold=(k == 1))
+        f.box(px, yy - bh / 2, bw, bh, fill=SLATE['soft'], stroke='none', width=0, arc=bh / 2)
+        f.box(px, yy - bh / 2, bw * v / 100, bh, fill=SKY['line'] if k else SKY['tok'], stroke=SKY['line'], width=1,
+              arc=bh / 2)
+        f.text(px + bw + 6, yy, f'{v}%', size=12.5, bold=(k == 1))
+    f.text(px, base + 24, 'RL covers what the<br>demonstrations miss', size=12.5, color=SKY['dark'], bold=True, lh=1.3)
+
+
+def build7():
+    gap = 18
+    st, xs, ws = layout('en', gap)
+    y, h = 8, 56
+    top = y + h + 44                    # 100 %
+    base = top + 84                     # 0 %
+    H = base + 48
+    f = Fig(WIDTH, H, LABEL)
+    stage_row(f, st, xs, ws, y, h, gap)
+    hh = base - top
+    for i, (head, note) in enumerate((('Base model (Qwen3-4B)', None), ('After SFT', f'≈ 1.4 h on 2 {TIMES} A100'))):
+        cx = xs[i] + ws[i] / 2
+        column_pair7(f, cx, base, hh, *VALS[i], SLATE if i == 0 else SKY)
+        f.text(cx, base + 15, head, size=12.5, color=MUTED if i == 0 else INK, anchor='c', bold=(i > 0))
+        if note:
+            f.text(cx, base + 33, note, size=12, color=MUTED, anchor='c')
+    cx, d = xs[2] + ws[2] / 2, 40       # RL: step 20 (pale) and step 100 (the result)
+    column_pair7(f, cx - d, base, hh, 98.6, 91.0, SKY, soft=True)
+    column_pair7(f, cx + d, base, hh, 98.6, 94.0, SKY, bold=True, width=1.5)
+    f.text(cx - d, base + 15, 'Step 20', size=12.5, color=MUTED, anchor='c')
+    f.text(cx + d, base + 15, 'Step 100', size=12.5, bold=True, anchor='c')
+    f.text(cx - d, base + 33, 'Seen saturates', size=12, color=MUTED, anchor='c')
+    f.text(cx + d, base + 33, '14.4 h', size=12, color=MUTED, anchor='c')
+    f.line([(xs[0] + 4, base), (xs[2] + ws[2] - 4, base)], color=SLATE['line'], width=1)
+    legend7(f, xs[0] + 6, top - 22)
+    xd = xs[3] - gap / 2
+    f.line([(xd, y + h + 18), (xd, H - 6)], color=SLATE['fill'], width=1, dashed=True, dash='4 4')
+    px = xs[3] + 8
+    two_object7(f, px, xs[3] + ws[3] - 2 - px, top - 22, base)
     return f

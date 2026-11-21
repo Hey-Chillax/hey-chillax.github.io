@@ -1,7 +1,8 @@
 """Scaffold-OPD full pipeline: teacher solutions -> rejection sampling -> SFT -> Scaffold-OPD -> GRPO on failures, with the
 four-benchmark average after each training stage.
 
-Variants: r1a / r1i / r1m, r2a / r2i / r2m, r3a / r3i / r3m; rounds 4-6 (r4a ... r6m) English only; final: r6m.
+Variants: r1a / r1i / r1m, r2a / r2i / r2m, r3a / r3i / r3m; rounds 4-6 (r4a ... r6m) English only;
+r7m (2026-11-21) is the interview deck's final ported back; final: r7m.
 Facts (projects/scaffold-opd.html, tools/data/scaffold_opd.json): 14,116 DAPO-Math problems, one teacher solution each
 (up to 16k tokens); a rule-based checker keeps 11,158 (79%); SFT one epoch; Scaffold-OPD 40 steps; GRPO on the 2,212
 problems the teacher solved but the student never got right during Scaffold-OPD, 30 steps. Average 25.4 -> 38.0 -> 42.6
@@ -264,6 +265,8 @@ def build_r3i(lang):
 
 
 def build(v, lang):
+    if v == 'r7m':
+        return staircase7()
     if v[:2] in ('r4', 'r5', 'r6'):
         return {'r4a': build4a, 'r4i': build4i, 'r4m': build4m,
                 'r5a': lambda: staircase5(drops=True),
@@ -474,4 +477,68 @@ def staircase6(fill=False, H=192):
         else:
             f.text(b, yy - 12, 'Base model (Qwen3-1.7B) <b>25.4</b>', size=12.5, color=MUTED, anchor='e')
         prev = (b, yy)
+    return f
+
+
+# ------------------------------------------------------------------ round 7 (2026-11-21): the deck's final, ported back
+# The interview deck redrew this figure for its slide in three rounds (resume repo:
+# ppt_src/figures/drawio/fig_opd_pipeline.py, final r3m) and the user chose that version for the homepage too. r7m is
+# that layout at the homepage's width and type scale: the benchmarks named under the row title, every level labelled the
+# same way (value above its tread, what it is below), dashed drop lines from each training stage to its score, and the
+# GPU-hours as brackets under the stages they cover (16.8 covers teacher solutions + SFT), the numbers in ink. The deck
+# drew the treads in the data charts' blue (#3B73B9) so they hold up on a projector; here they take the palette's dark
+# sky, which is just as strong and has a dark-theme colour.
+def ink_unit(num, rest):
+    """'16.8 GPU-h ...': the number in ink, the rest muted."""
+    return f'<span style="color:{INK};">{num}</span>{rest}'
+
+
+def bracket_row(f, spans, y, foot=5, label_dy=12, size=12):
+    """GPU-hour brackets: spans = [(x0, x1, label), ...]; the feet point up at the stages they cover."""
+    for x0, x1, lab in spans:
+        f.edge([(x0, y - foot), (x0, y), (x1, y), (x1, y - foot)], color=SLATE['line'], width=1, arrow=False,
+               rounded=False)
+        f.text((x0 + x1) / 2, y + label_dy, lab, size=size, color=MUTED, anchor='c')
+
+
+def staircase7():
+    y, h = 8, 56
+    top, bot = y + h + 46, y + h + 112          # treads: 46.6 at top, the base model's 25.4 at bot
+    yb = bot + 13 + 20                          # bracket line, under the base model's label
+    H = yb + 12 + 11
+    f = Fig(WIDTH, H, LABEL)
+    xs, ws = stage_row(f, 'en', y, h)
+    lo, hi = BASE, 46.6
+    line = SKY['dark']
+
+    def yv(v):
+        return bot - (v - lo) / (hi - lo) * (bot - top)
+
+    hx = xs[0] + 6
+    f.text(hx, top - 12, '4-benchmark average', size=12.5, bold=True)
+    f.text(hx, top + 5, 'MATH-500 · AIME 2024–26', size=12, color=MUTED)
+    levels = [(xs[0], xs[1] + ws[1], BASE, None)] + [(xs[i], xs[i] + ws[i], sc[0], sc) for i, sc in enumerate(SCORES) if sc]
+    prev = None
+    for x0, x1, v, sc in levels:
+        key = sc is not None and sc[0] == 42.6
+        yy = yv(v)
+        a, b = x0 + 6, x1 - 6
+        cx = (a + b) / 2
+        if sc:
+            f.line([(cx, y + h + 2), (cx, yy - 22)], color=SLATE['line'], width=1, dashed=True, dash='2 3')
+        if prev is not None:
+            f.line([prev, (a, yy)], color=line, width=1.3)
+        f.line([(a, yy), (b, yy)], color=line if sc else SLATE['line'], width=3 if key else 2)
+        if sc:
+            f.text(cx, yy - 12, f'<b>{v:.1f}</b>', size=14, color=line if key else INK, anchor='c')
+            f.text(cx, yy + 13, f'+{sc[1]:.1f}', size=12, color=line if key else MUTED, anchor='c', bold=key)
+        else:
+            cxb = b - 90
+            f.text(cxb, yy - 12, '<b>25.4</b>', size=14, color=MUTED, anchor='c')
+            f.text(cxb, yy + 13, 'Base model (Qwen3-1.7B)', size=12, color=MUTED, anchor='c')
+        prev = (b, yy)
+    spans = [(xs[0] + 3, xs[2] + ws[2] - 3, ink_unit('16.8', ' GPU-h · teacher solutions + SFT')),
+             (xs[3] + 3, xs[3] + ws[3] - 3, ink_unit('15.4', ' GPU-h')),
+             (xs[4] + 3, xs[4] + ws[4] - 3, ink_unit('20.0', ' GPU-h'))]
+    bracket_row(f, spans, yb)
     return f

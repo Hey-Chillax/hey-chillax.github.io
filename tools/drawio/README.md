@@ -14,7 +14,7 @@ draw.io Desktop, and rewritten into a page-ready SVG whose colours are CSS varia
 | `render.js` | Preview renderer (Playwright): the SVG inline with the site's Comic Neue and the colour variables |
 | `diagram-colors.css` | The `--dg-*` variables, light and dark (`python3 tools/drawio/webify.py --css` rewrites it) |
 | `src/<name>/` | The `.drawio` of every round: `rNa` aesthetic, `rNi` innovative, `rNm` merged (opens in draw.io) |
-| `out/<name>.en.svg` | The finals (round 6, merged; English only) |
+| `out/<name>.en.svg` | The finals (English only): round 6, merged; the two pipelines are round 7 (below) |
 
 Build one figure (Pillow is needed, so use a virtualenv; previews need node with Playwright):
 
@@ -25,6 +25,9 @@ DRAWIO_SCRATCH=/some/tmp DRAWIO_NODE_PATH=/path/to/node_modules \
 
 Since 2026-11-17 the homepage shows English figures only: rounds 4-6 are built with `--lang en`, and the finals are
 `out/<name>.en.svg` (round 6, merged). The `out/<name>.zh.svg` files are the round-3 Chinese finals, no longer used.
+On 2026-11-21 the two pipelines were replaced by the interview deck's version (resume repo,
+`ppt_src/figures/drawio/fig_*_pipeline.py`, final r3m), ported back as round 7 (`r7m`) at the page's width and type
+scale; the deck drew the score staircase in the data charts' blue, here it uses the palette's dark sky.
 
 On the page the SVG must be inlined (an `<img>` cannot see the page's CSS variables), with
 `diagram-colors.css` loaded; text uses `'YZ Hand'` (Comic Neue), symbols Times New Roman.
